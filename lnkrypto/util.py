@@ -1,3 +1,9 @@
+import sys
+
+if sys.version_info[0] >= 3:
+    import binascii
+
+
 def int2hex(i):
     if i < 0:
         raise ValueError('Input integer must be not negative.')
@@ -12,12 +18,30 @@ def hex2int(h):
     return int(h, 16)
 
 
-def hex2str(h):
-    return h.decode('hex')
+if sys.version_info[0] >= 3:
+    def str2bytes(s):
+        return s.encode('utf-8')
 
+    def bytes2str(b):
+        return b.decode('utf-8')
 
-def str2hex(s):
-    return s.encode('hex')
+    def hex2bytes(h):
+        return bytes.fromhex(h)
+
+    def bytes2hex(b):
+        return bytes2str(binascii.hexlify(b))
+
+    def hex2str(h):
+        return bytes2str(hex2bytes(h))
+
+    def str2hex(s):
+        return bytes2hex(str2bytes(s))
+else:
+    def hex2str(h):
+        return h.decode('hex')
+
+    def str2hex(s):
+        return s.encode('hex')
 
 
 def int2str(i):
