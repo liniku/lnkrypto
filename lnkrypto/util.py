@@ -50,3 +50,10 @@ def int2str(i):
 
 def str2int(s):
     return bytes2int(str2bytes(s))
+
+
+def human_can_read(b):
+    for c in b:
+        if (c < 32 or c > 126) and c != 9 and c != 10:
+            return False
+    return True
