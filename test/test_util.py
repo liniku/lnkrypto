@@ -1,4 +1,4 @@
-from nose.tools import eq_, raises
+from nose.tools import eq_, ok_, raises
 from lnkrypto.util import \
     int2bytes, \
     bytes2int, \
@@ -11,7 +11,8 @@ from lnkrypto.util import \
     hex2str, \
     str2hex, \
     int2str, \
-    str2int
+    str2int, \
+    human_can_read
 
 
 class TestUtil:
@@ -117,3 +118,9 @@ class TestUtil:
 
     def test_str2int(self):
         eq_(str2int('wasabi'), 131260431295081)
+
+    def test_human_can_read(self):
+        ok_(human_can_read(b'maguro'))
+        ok_(human_can_read(b'!"#$%&\'()=~|`{+*}<>?_-^\\@[;:],./'))
+        ok_(human_can_read(b'a\nb\tc'))
+        ok_(not human_can_read(b'abcdefg\x03'))
