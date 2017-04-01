@@ -1,8 +1,11 @@
 import binascii
 
 
-def int2bytes(i):
-    return i.to_bytes(max((i.bit_length() + 7) // 8, 1), byteorder='big')
+def int2bytes(i, min_length=1):
+    if min_length < 1:
+        raise ValueError('min_length must be postiive integer.')
+    return i.to_bytes(max((i.bit_length() + 7) // 8, min_length),
+                      byteorder='big')
 
 
 def bytes2int(b):

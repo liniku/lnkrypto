@@ -49,6 +49,15 @@ class TestUtil:
         eq_(int2bytes(4627), b'\x12\x13')
         eq_(int2bytes(131260431295081), b'wasabi')
 
+    def test_int2bytes_min_length(self):
+        eq_(int2bytes(0, min_length=3), b'\x00\x00\x00')
+        eq_(int2bytes(131260431295081, min_length=3), b'wasabi')
+        eq_(int2bytes(131260431295081, min_length=9), b'\x00\x00\x00wasabi')
+
+    @raises(ValueError)
+    def test_int2bytes_invalid_min_length(self):
+        int2bytes(1000, min_length=-1)
+
     @raises(OverflowError)
     def test_int2bytes_invalid(self):
         int2bytes(-1)
