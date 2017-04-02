@@ -1,6 +1,6 @@
 import binascii
 
-DEFAULT_SYMBOL_COVERAGE_THRES = 0.3
+DEFAULT_SYMBOL_COVERAGE_THRES = 0.25
 
 
 def int2bytes(i, min_length=1):
