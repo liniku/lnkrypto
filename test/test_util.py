@@ -12,7 +12,9 @@ from lnkrypto.util import \
     str2hex, \
     int2str, \
     str2int, \
-    human_can_read
+    printable_ascii, \
+    human_can_read_en, \
+    hamming_distance
 
 
 class TestUtil:
@@ -119,8 +121,21 @@ class TestUtil:
     def test_str2int(self):
         eq_(str2int('wasabi'), 131260431295081)
 
-    def test_human_can_read(self):
-        ok_(human_can_read(b'maguro'))
-        ok_(human_can_read(b'!"#$%&\'()=~|`{+*}<>?_-^\\@[;:],./'))
-        ok_(human_can_read(b'a\nb\tc'))
-        ok_(not human_can_read(b'abcdefg\x03'))
+    def test_printable_ascii(self):
+        ok_(printable_ascii(b'maguro'))
+        ok_(printable_ascii(b'!"#$%&\'()=~|`{+*}<>?_-^\\@[;:],./'))
+        ok_(printable_ascii(b'a\nb\tc'))
+        ok_(not printable_ascii(b'abcdefg\x03'))
+
+    def test_human_can_read_en(self):
+        ok_(not human_can_read_en(b'ab.*^-32++'))
+        ok_(human_can_read_en(b'ab.*^-32++',
+                              symbol_coverage_thres=0.8))
+
+    def test_hamming_distance(self):
+        eq_(hamming_distance(b'\x12\x34', b'\x17\x84'), 5)
+        eq_(hamming_distance(b'wabi', b'sabi'), 1)
+
+    @raises(ValueError)
+    def test_hamming_distance_invalid(self):
+        hamming_distance(b'wabi', b'wasabi')
