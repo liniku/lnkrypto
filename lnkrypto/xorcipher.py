@@ -26,6 +26,9 @@ def simple_xor_freq_attack_fixed_length(c,
                                         key_length,
                                         common_bytes=COMMON_BYTES_EN,
                                         plain_check_func=human_can_read_en):
+    if key_length < 0:
+        raise ValueError('Key length must be postive value.')
+
     key = []
     for i in range(key_length):
         b = c[i::key_length]
@@ -60,6 +63,67 @@ def simple_xor_freq_attack(c,
     # key length with the minimum hamming distance is likely to be correct
     for _, key_length in h:
         r = simple_xor_freq_attack_fixed_length(c, key_length,
+                                                common_bytes, plain_check_func)
+        if r is not None:
+            return r
+
+
+def simple_xor_crib_attack_fixed_length(c,
+                                        crib,
+                                        key_length,
+                                        common_bytes=COMMON_BYTES_EN,
+                                        plain_check_func=human_can_read_en):
+    if key_length < 0:
+        raise ValueError('Key length must be postive value.')
+
+    crib_length = len(crib)
+    for i in range(len(c) - crib_length):
+        # restore a key from the crib
+        key_restored = True
+        k = [-1] * key_length
+        for j in range(crib_length):
+            t = c[i + j] ^ crib[j]
+            p = (i + j) % key_length
+            if k[p] < 0:
+                k[p] = t
+            elif k[p] != t:
+                # the key restored from the crib is not consistent
+                key_restored = False
+                break
+        if not key_restored:
+            continue
+
+        # check the key is valid
+        check_passed = True
+        for j in range(key_length):
+            if k[j] < 0:
+                continue
+            if not plain_check_func(simple_xor(c[j::key_length],
+                                               int2bytes(k[j]))):
+                check_passed = False
+                break
+
+        # retrun key, plaintext (partially decoded) and mask
+        if check_passed:
+            mask = []
+            for j in range(len(k)):
+                if k[j] < 0:
+                    k[j] = 0
+                    mask.append(False)
+                else:
+                    mask.append(True)
+            k = bytes(k)
+            p = simple_xor(c, k)
+            return k, p, mask
+
+
+def simple_xor_crib_attack(c,
+                           crib,
+                           max_key_length,
+                           common_bytes=COMMON_BYTES_EN,
+                           plain_check_func=human_can_read_en):
+    for key_length in range(max_key_length, 0, -1):
+        r = simple_xor_crib_attack_fixed_length(c, crib, key_length,
                                                 common_bytes, plain_check_func)
         if r is not None:
             return r
