@@ -91,3 +91,14 @@ def hamming_distance(b1, b2):
             x >>= 1
 
     return r
+
+
+def pkcs7_pad(b, n):
+    if n < 1 or n > 255:
+        raise ValueError('Block size must be between 1 and 255')
+    t = n - len(b) % n
+    return b + (t.to_bytes(1, byteorder='big') * t)
+
+
+def pkcs7_unpad(b):
+    return b[:-b[-1]]

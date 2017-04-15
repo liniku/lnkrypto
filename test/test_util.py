@@ -14,7 +14,9 @@ from lnkrypto.util import \
     str2int, \
     printable_ascii, \
     human_can_read_en, \
-    hamming_distance
+    hamming_distance, \
+    pkcs7_pad, \
+    pkcs7_unpad
 
 
 class TestUtil:
@@ -139,3 +141,24 @@ class TestUtil:
     @raises(ValueError)
     def test_hamming_distance_invalid(self):
         hamming_distance(b'wabi', b'wasabi')
+
+    def test_pkcs7_pad(self):
+        eq_(pkcs7_pad(b'', 4), b'\x04\x04\x04\x04')
+        eq_(pkcs7_pad(b'abc', 4), b'abc\x01')
+        eq_(pkcs7_pad(b'abcd', 4), b'abcd\x04\x04\x04\x04')
+        eq_(pkcs7_pad(b'abcdef', 4), b'abcdef\x02\x02')
+        eq_(pkcs7_pad(b'abcd', 1), b'abcd\x01')
+        eq_(pkcs7_pad(b'0' * 254, 255), b'0' * 254 + b'\x01')
+
+    @raises(ValueError)
+    def test_pkcs7_pad_invalidly_small_block_size(self):
+        pkcs7_pad(b'abcd', 0)
+
+    @raises(ValueError)
+    def test_pkcs7_pad_invalidly_large_block_size(self):
+        pkcs7_pad(b'abcd', 256)
+
+    def test_pkcs7_unpad(self):
+        eq_(pkcs7_unpad(b'\x04\x04\x04\x04'), b'')
+        eq_(pkcs7_unpad(b'abc\x01'), b'abc')
+        eq_(pkcs7_unpad(b'abcde\x02\x02\x02'), b'abcde\x02')
