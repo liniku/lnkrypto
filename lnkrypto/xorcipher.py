@@ -115,3 +115,15 @@ def simple_xor_crib_attack_fixed_length(c,
             k = bytes(k)
             p = simple_xor(c, k)
             return k, p, mask
+
+
+def simple_xor_crib_attack(c,
+                           crib,
+                           max_key_length,
+                           common_bytes=COMMON_BYTES_EN,
+                           plain_check_func=human_can_read_en):
+    for key_length in range(max_key_length, 0, -1):
+        r = simple_xor_crib_attack_fixed_length(c, crib, key_length,
+                                                common_bytes, plain_check_func)
+        if r is not None:
+            return r

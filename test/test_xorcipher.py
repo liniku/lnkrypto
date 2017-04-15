@@ -4,7 +4,8 @@ from lnkrypto.xorcipher import \
     simple_xor_freq_attack_single_byte, \
     simple_xor_freq_attack_fixed_length, \
     simple_xor_freq_attack, \
-    simple_xor_crib_attack_fixed_length
+    simple_xor_crib_attack_fixed_length, \
+    simple_xor_crib_attack
 
 
 class TestXORCipher:
@@ -78,3 +79,15 @@ class TestXORCipher:
         r2 = simple_xor_crib_attack_fixed_length(ciphertext,
                                                  b'We were lucky', 4)
         eq_(r2, None)
+
+    def test_simple_xor_crib_attack(self):
+        ciphertext = b'=\x10N\x1c\x0f\x07\x0bK\x1c\x10\x1c\x12J\x19'\
+            b'\x1b\x08\x01\x0cN\x1f\x05U\x1d\x0e\x0fU\x1a\x03\x0b\x01@'
+
+        k, p, m = simple_xor_crib_attack(ciphertext, b' to ', 6)
+        eq_(k, b'junk')
+        eq_(p, b'We were very lucky to see that.')
+        eq_(m, [True, True, True, True])
+
+        r = simple_xor_crib_attack(ciphertext, b' pk@/', 6)
+        eq_(r, None)
