@@ -3,7 +3,8 @@ from lnkrypto.xorcipher import \
     simple_xor, \
     simple_xor_freq_attack_single_byte, \
     simple_xor_freq_attack_fixed_length, \
-    simple_xor_freq_attack
+    simple_xor_freq_attack, \
+    simple_xor_crib_attack_fixed_length
 
 
 class TestXORCipher:
@@ -54,3 +55,26 @@ class TestXORCipher:
         k, p = simple_xor_freq_attack(ciphertext, max_key_length=6)
         eq_(k, key)
         eq_(p, plaintext)
+
+    def test_simple_xor_crib_attack_fixed_length(self):
+        ciphertext = b'=\x10N\x1c\x0f\x07\x0bK\x1c\x10\x1c\x12J\x19'\
+            b'\x1b\x08\x01\x0cN\x1f\x05U\x1d\x0e\x0fU\x1a\x03\x0b\x01@'
+
+        k1, p1, m1 = simple_xor_crib_attack_fixed_length(ciphertext,
+                                                         b' to ', 4)
+        eq_(k1, b'junk')
+        eq_(p1, b'We were very lucky to see that.')
+        eq_(m1, [True, True, True, True])
+
+        k2, p2, m2 = simple_xor_crib_attack_fixed_length(ciphertext,
+                                                         b' lu', 4)
+        eq_(k2, b'jun\x00')
+        eq_(p2, b'We \x1cereKver\x12 lu\x08ky \x1fo s\x0ee t\x03at.')
+        eq_(m2, [True, True, True, False])
+
+        r1 = simple_xor_crib_attack_fixed_length(ciphertext, b'zx', 4)
+        eq_(r1, None)
+
+        r2 = simple_xor_crib_attack_fixed_length(ciphertext,
+                                                 b'We were lucky', 4)
+        eq_(r2, None)
